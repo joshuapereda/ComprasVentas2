@@ -1,0 +1,44 @@
+server:
+    #PUERTO
+    port: 9500
+spring: 
+    application:
+        # NOMBRE DE LA APLICACIÓN
+        name: compras-ventas2
+    datasource:
+        # CONFIGURACIÓN DE LA BASE DE DATOS POSTGRESQL
+        driver-class-name: org.postgresql.Driver
+        # URL DE CONEXIÓN A LA BASE DE DATOS
+        url: jdbc:postgresql://localhost:5432/compras-ventas2
+        # USUARIO Y CONTRASEÑA
+        username: postgres
+        password: admin
+    jpa:
+        # DDL-AUTO CONFIGURADO EN CREATE-DROP PARA CREAR Y 
+        # ELIMINAR LAS TABLAS EN CADA EJECUCIÓN
+        hibernate:
+            ddl-auto: create-drop
+        show-sql: true 
+ #PARA UTILIZAR LOS LOGS       
+logging:
+    level:
+        root: INFO
+        com.blumbit.comprasVentas2: DEBUG
+        org.springframework.web: WARN
+        org.hibernate: WARN
+    file:
+        name: logs/comprasVentas2.log
+    logback:
+        rollingpolicy:
+            file-name-pattern: logs/comprasVentas2-%d{yyyy-MM-dd}.%i.log
+            max-history: 30
+            max-file-size: 10MB
+            total-size-cap: 1GB
+ #PARA REFRESH TOKEN
+    application:
+        jwt:
+            secret-key: mysecretkey
+            access-token-expiration: 9000
+          
+            
+
