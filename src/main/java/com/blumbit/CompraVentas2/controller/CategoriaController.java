@@ -3,6 +3,7 @@ package com.blumbit.CompraVentas2.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +30,7 @@ public class CategoriaController {
     private  CategoriaService categoriaServicee;
 
     @GetMapping 
+    @PreAuthorize("hasAutority('ROL_VENDEDOR')")
     public List<CategoriaDto> listarCategorias() {
         return categoriaServicee.listarCategorias();
     }
@@ -37,15 +39,22 @@ public class CategoriaController {
         return categoriaServicee.obtenerCategoriaPorId(id);
     }
     @PostMapping
+    @PreAuthorize("hasAutority('ROL_VENDEDOR','ROL_ADMIN')")
     public CategoriaDto crearCategoria( @RequestBody CreateCategoriaDto categoria) {
         return categoriaServicee.crearCategoria(categoria);
     }
+
     @PutMapping("/{id}")
+    //hasAutority - Para los permisos 
+    @PreAuthorize("hasAutority('ACTUALIZAR_CATEGORIA')")
     public CategoriaDto actualizarCategoria(@PathVariable Integer id, @RequestBody Categoria categoriaActualizada) {
         return categoriaServicee.actualizarCategoria(id, categoriaActualizada);
     }
 
     @DeleteMapping("/{id}")
+    //hasRole - Para los roles (recuera cambial a ROLE en el AppConfig)
+    //hasRole trabaja asi  ->ROLE_ADMIN
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteCategoria(@PathVariable Integer id) {
         categoriaServicee.eliminarCategoria(id);
     }

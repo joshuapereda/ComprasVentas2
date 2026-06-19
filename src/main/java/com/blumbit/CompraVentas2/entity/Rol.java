@@ -14,6 +14,7 @@ import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.TableGenerator;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -23,6 +24,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @TableGenerator(name = "roles")
 public class Rol {
     @Id
@@ -31,9 +33,10 @@ public class Rol {
 
     @Column( nullable = false, length = 100)
     private String nombre;
-
+    
     @Column(length = 200)
-    private String recurso;
+    private String descripcion;
+
 
     //RELACIONES DE N a N
     @ManyToMany

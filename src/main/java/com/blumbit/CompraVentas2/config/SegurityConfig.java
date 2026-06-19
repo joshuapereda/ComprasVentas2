@@ -14,12 +14,16 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.blumbit.CompraVentas2.auth.JwtAuthenticationFilter;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SegurityConfig {
     @Autowired
     private AuthenticationProvider authenticationProvider;
+    @Autowired
+    private JwtAuthenticationFilter jwtAuthFilter;
 
     //DEFINIR SecurityFilterChain
     @Bean
@@ -27,25 +31,39 @@ public class SegurityConfig {
         //LOGICA
         try {
             http
+                /*Desactivamos CSRF porque nuestra aplicación utiliza autenticación
+                basada en JWT y trabaja en modo Stateless. No dependemos de sesiones 
+                del servidor ni de cookies de sesión que el navegador envía automáticamente. 
+                En cada petición el cliente debe enviar explícitamente el token JWT en el encabezado,
+                por lo que la protección CSRF generalmente no es necesaria. */
                 .csrf(csrf -> csrf.disable())
-                //DAR SEGURIDAD A LAS CREDENCIALES 
+                //DAR SEGURIDAD A LAS PETICIONES 
                 .authorizeHttpRequests(auth -> auth
-                    //MACH - VER SI HAY UNA PETICION DE ALGUNA RUTA EN PARTICULAR 
+                    
+                    // permitAll() -> Permite acceder a esta ruta sin estar autenticado
+                    // Es decir, no requiere enviar un JWT válido
                     .requestMatchers("/login").permitAll()
-                    //VALIDAR DISTINTAS RUTAS DEL SERVICIO
-                    // VA PEDIR PERMISOS Y ROLES 
-                    .requestMatchers("/productos").hasAnyAuthority("VER_PRODUCTOS","ROLE_ENCARGADO_ALMACEN")
-                    .requestMatchers("/ventas").hasAnyAuthority("VER_VENTAS","ROLES_VENDEDOR")
-                    //PARA CUALQUIE PETICION VA ESTA AUTENTICADO OSES VA PEDIR TOKEN VALIDO
+                    // hasAnyAuthority() -> Solo permite acceder si el usuario posee
+                    // alguno de los permisos o roles especificados
+                    .requestMatchers("/productos").hasAnyAuthority("LISTAR_PRODUCTOS","ROLE_ENCARGADO_ALMACEN")
+                    .requestMatchers("/ventas").hasAnyAuthority("ROL_ADMIN")
+                    // Cualquier otra petición requiere autenticación.
+                    // Para acceder debe enviarse un JWT válido.
                     .anyRequest().authenticated()
                 )
-                //SEGURIDAD DE LOS CORS
-                //Customizer - la estencin de segurity config 
+                // Habilita la configuración CORS definida en AppConfig.
+                // Permite controlar qué aplicaciones pueden consumir la API.   
                 .cors(Customizer.withDefaults())
+                // Stateless significa que Spring Security NO almacenará sesiones.
+                // Cada petición deberá autenticarse enviando un JWT.
+                // El servidor no recuerda usuarios entre peticiones.
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Registramos el AuthenticationProvider que será el encargado
+                // de validar usuario y contraseña durante el login.
                 .authenticationProvider(authenticationProvider)
-                //añadir un filtro
-                .addFilterBefore(null, UsernamePasswordAuthenticationFilter.class);
+                // Agregamos nuestro filtro JWT antes del filtro de autenticación
+                // de Spring Security para validar el token en cada petición.
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
             return http.build();
         } catch (Exception e) {
           throw new RuntimeException("Error configurando Filter chain");

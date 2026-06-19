@@ -34,11 +34,21 @@ logging:
             max-history: 30
             max-file-size: 10MB
             total-size-cap: 1GB
- #PARA REFRESH TOKEN
-    application:
-        jwt:
-            secret-key: mysecretkey
-            access-token-expiration: 9000
+#PARA REFRESH TOKEN
+application:
+    jwt:
+        #clave secreta
+        secret-key: mysecretkey
+        #tiempo de expiracion  - 15 minutos por eso esta 9000 que es en milisegundos
+        access-token-expiration: 9000
+        refresh-token-expiration: 604800000 # 7 dias en milesegundos
+            
+
           
             
 
+#El Access Token es el token utilizado para acceder a los recursos protegidos de la API. 
+#Tiene una duración corta por motivos de seguridad. Cuando expira, el usuario no necesariamente 
+#debe volver a iniciar sesión porque existe el Refresh Token. El Refresh Token tiene una duración mayor 
+#y permite solicitar nuevos Access Tokens sin volver a ingresar las credenciales. Solamente cuando el Refresh 
+#Token expira, el usuario deberá autenticarse nuevamente.

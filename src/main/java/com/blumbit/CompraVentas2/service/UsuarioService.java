@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.blumbit.CompraVentas2.dto.CreateUsuarioDto;
@@ -30,6 +31,9 @@ public class UsuarioService implements IUsuarioService  {
     private PersonaRepository personaRepository;
     @Autowired
     private RolRepository rolRepository;
+
+    @Autowired
+    private  PasswordEncoder passwordEncoder;
     @Override
     public List<UsuarioDto> listarUsuarios() {
         return usuarioRepository.findAll().stream().map(usuario ->{
@@ -63,6 +67,8 @@ public class UsuarioService implements IUsuarioService  {
         List<Rol>roles=rolRepository.findAllById(createUsuarioDto.getRoles());
 
         Usuario usuario=CreateUsuarioDto.toEntityUsuario(createUsuarioDto);
+                //encriptamos la contraseña gracias a que inyectamos  PasswordEncoder    
+                usuario.setPassword(passwordEncoder.encode(createUsuarioDto.getPassword()));
                 usuario.setRoles(roles);
         usuario=usuarioRepository.save(usuario);
         Persona persona = CreateUsuarioDto.toEntityPersona(createUsuarioDto, usuario);
@@ -80,7 +86,7 @@ public class UsuarioService implements IUsuarioService  {
         
         usuarioRetrieved.setRoles(rolRepository.findAllById(createUsuarioDto.getRoles()));
         usuarioRetrieved.setEmail(createUsuarioDto.getCorreo());
-        usuarioRetrieved.setPassword(createUsuarioDto.getPassword());
+        usuarioRetrieved.setPassword(passwordEncoder.encode(createUsuarioDto.getPassword()));
         usuarioRetrieved.setNombre(createUsuarioDto.getNombre());
         Persona personaRetrieved = personaRepository.findByUsuario(usuarioRetrieved);
         personaRetrieved.setNombre(createUsuarioDto.getNombre());
